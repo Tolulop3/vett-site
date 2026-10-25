@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VETT — Stock Score Hover</title>
+<meta name="description" content="Hover any stock ticker on any page and get a daily quantitative score (0–100). Free, no account, no data collected. Educational only — not financial advice.">
+<style>
+  :root{
+    --navy:#0B1F3A; --navy2:#0E2A4F; --panel:#102A4A; --line:#1E3E66;
+    --paper:#EAF2F8; --grey:#9FB3C8; --teal:#00F5A0; --amber:#FFC24B; --red:#FF6B6B;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--navy);color:var(--paper);line-height:1.6}
+  a{color:var(--teal);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  /* header */
+  header{position:sticky;top:0;background:rgba(11,31,58,.92);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:10}
+  .bar{display:flex;align-items:center;gap:14px;padding:12px 0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.25rem;letter-spacing:.06em;color:var(--paper)}
+  .badge{width:30px;height:30px;border-radius:8px;background:var(--navy2);border:1px solid var(--line);display:grid;place-items:center}
+  .badge svg{width:18px;height:18px}
+  nav{margin-left:auto;display:flex;gap:20px;align-items:center;font-size:.95rem}
+  nav a{color:var(--paper)}
+  .pill{border:1px solid var(--teal);color:var(--teal);border-radius:999px;padding:5px 13px;font-size:.85rem;font-weight:600}
+  /* hero */
+  .hero{padding:56px 0 30px;display:grid;grid-template-columns:1fr 1.15fr;gap:44px;align-items:center}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .kicker{color:var(--teal);font-weight:700;letter-spacing:.14em;font-size:.8rem;text-transform:uppercase}
+  h1{font-size:2.7rem;line-height:1.12;margin:.35em 0 .4em}
+  .sub{color:var(--grey);font-size:1.13rem;max-width:34em}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin:22px 0 26px}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 14px;font-size:.88rem}
+  .chip b{color:var(--teal)}
+  .cta{display:inline-block;background:var(--teal);color:#04231A;font-weight:800;border-radius:10px;padding:13px 22px;font-size:1rem}
+  .cta-note{color:var(--grey);font-size:.86rem;margin-top:9px}
+  /* demo stage */
+  .stage{background:linear-gradient(160deg,#0E2A4F,#0A1B33);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .browser{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0D2442}
+  .bbar{display:flex;gap:7px;align-items:center;background:#0A1B33;padding:9px 12px;border-bottom:1px solid var(--line)}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .url{margin-left:8px;background:#102A4A;border-radius:6px;color:var(--grey);font-size:.78rem;padding:3px 10px;flex:1;white-space:nowrap;overflow:hidden}
+  .article{padding:16px 18px;font-size:.98rem;color:#C9D8E8;min-height:118px}
+  .article .src{color:var(--grey);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+  .tk{color:var(--teal);font-weight:700;cursor:pointer;border-bottom:2px dotted rgba(0,245,160,.55);padding:0 1px}
+  .tk.active{background:rgba(0,245,160,.14);border-radius:4px}
+  .hint{color:var(--grey);font-size:.82rem;margin:12px 2px 0}
+  /* THE card */
+  .card{margin-top:16px;background:#0F2C50;border:1px solid #26507F;border-radius:16px;padding:22px 22px 16px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+  .card-top{display:flex;gap:20px;align-items:center}
+  .ring{position:relative;width:118px;height:118px;flex:0 0 auto}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .num{position:absolute;inset:0;display:grid;place-items:center;font-size:2.5rem;font-weight:800}
+  .who{min-width:0}
+  .sym{font-size:1.7rem;font-weight:800;line-height:1.1}
+  .name{color:var(--grey);font-size:.95rem}
+  .verdict{display:inline-block;margin-top:8px;font-weight:800;font-size:1.02rem;border-radius:8px;padding:4px 12px}
+  .v-green{background:rgba(0,245,160,.14);color:var(--teal)}
+  .v-red{background:rgba(255,107,107,.14);color:var(--red)}
+  .v-amber{background:rgba(255,194,75,.15);color:var(--amber)}
+  .regime{margin-left:8px;color:var(--grey);font-size:.88rem;border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+  .why{margin:16px 0 4px;padding:0;list-style:none}
+  .why li{padding:5px 0 5px 24px;position:relative;color:#D7E5F2}
+  .why li::before{content:"▸";position:absolute;left:4px;color:var(--teal)}
+  .card-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:12px;padding-top:11px;color:var(--grey);font-size:.83rem}
+  .sample-tag{color:#04231A;background:var(--amber);font-weight:800;border-radius:6px;padding:2px 8px;font-size:.72rem;letter-spacing:.06em}
+  .est{margin-top:14px;display:flex;gap:12px;align-items:center;background:#0D2442;border:1px dashed #26507F;border-radius:12px;padding:12px 16px;font-size:.92rem;color:#C9D8E8}
+  .est b{color:var(--paper)}
+  .est .tag{color:var(--amber);font-weight:700}
+  /* sections */
+  section{padding:44px 0}
+  h2{font-size:1.7rem;margin:0 0 8px}
+  .lead{color:var(--grey);max-width:44em}
+  .bands{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+  @media(max-width:800px){.bands{grid-template-columns:1fr}}
+  .band{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:18px}
+  .band .score{font-size:1.5rem;font-weight:800}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+  @media(max-width:900px){.steps{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.steps{grid-template-columns:1fr}}
+  .step{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:18px}
+  .step .n{color:var(--teal);font-weight:800;font-size:1.3rem}
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+  @media(max-width:800px){.vs{grid-template-columns:1fr}}
+  .vs>div{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--panel)}
+  .vs ul{margin:8px 0 0;padding-left:18px;color:#C9D8E8}
+  footer{border-top:1px solid var(--line);padding:28px 0 44px;color:var(--grey);font-size:.88rem}
+  .nfa{background:#0A1B33;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<header><div class="wrap bar">
+  <a class="logo" href="./"><span class="badge"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 L9.5 18 L20 6" stroke="#00F5A0" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>VETT</a>
+  <nav>
+    <a href="methodology/">Methodology</a>
+    <a href="privacy/">Privacy</a>
+    <span class="pill">Chrome Web Store · coming soon</span>
+  </nav>
+</div></header>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="kicker">Chrome extension · Free</div>
+      <h1>See a quantitative score for any stock. Instantly.</h1>
+      <p class="sub">Hover over any ticker on any page and VETT surfaces its daily score, the market regime, and the signal behind it — powered by an engine that logs every pick it makes and grades itself against real outcomes.</p>
+      <div class="chips">
+        <span class="chip"><b>0–100</b> score range</span>
+        <span class="chip"><b>Daily</b> refresh</span>
+        <span class="chip"><b>3,200+</b> picks logged &amp; graded</span>
+        <span class="chip"><b>Zero</b> data collected</span>
+      </div>
+      <a class="cta" href="#demo">See it in action ↓</a>
+      <div class="cta-note">Launching on the Chrome Web Store soon. No account. No sign-up.</div>
+    </div>
+
+    <div class="stage" id="demo">
+      <div class="browser">
+        <div class="bbar"><span class="dot" style="background:#FF6B6B"></span><span class="dot" style="background:#FFC24B"></span><span class="dot" style="background:#00F5A0"></span><span class="url">finance.yahoo.com/news/market-wrap</span></div>
+        <div class="article">
+          <div class="src">Market wrap · Sample page</div>
+          Analysts remain bullish on <span class="tk active" data-t="NVDA">$NVDA</span> heading into earnings, citing data-center demand and AI infrastructure tailwinds. Meanwhile <span class="tk" data-t="AMD">$AMD</span> trades near support after a three-week pullback, and unlisted names like <span class="tk" data-t="RIVN">$RIVN</span> sit outside the daily scored universe.
+        </div>
+      </div>
+
+      <div class="card" id="card">
+        <div class="card-top">
+          <div class="ring">
+            <svg width="118" height="118"><circle cx="59" cy="59" r="52" stroke="#1E3E66" stroke-width="10" fill="none"/><circle id="arc" cx="59" cy="59" r="52" stroke="#00F5A0" stroke-width="10" fill="none" stroke-linecap="round"/></svg>
+            <div class="num" id="num">82</div>
+          </div>
+          <div class="who">
+            <div class="sym" id="sym">NVDA</div>
+            <div class="name" id="cname">NVIDIA Corporation · NASDAQ</div>
+            <span class="verdict v-green" id="verdict">🟢 Investigate</span><span class="regime" id="regime">Regime: Bull</span>
+          </div>
+        </div>
+        <ul class="why" id="why">
+          <li>Relative strength in the top decile of the scored universe</li>
+          <li>Volume accumulation over the last 3 sessions</li>
+          <li>Trend intact — above its 50- and 200-day averages</li>
+        </ul>
+        <div class="card-foot">
+          <span id="asof">Daily score · Data as of Oct 24, 2026</span>
+          <span><span class="sample-tag">SAMPLE CARD</span> · <a href="methodology/">How scoring works ↗</a></span>
+        </div>
+      </div>
+
+      <div class="est" id="estbox" style="display:none">
+        <span>📍</span><span><b>RIVN</b> isn't in the daily brief, so VETT builds a clearly-labelled estimate from live technicals instead: <b>64</b> <span class="tag">Est.</span> — never passed off as an engine score.</span>
+      </div>
+      <p class="hint">👆 Hover or tap the tickers in the sample article — this is the actual card, at actual size.</p>
+    </div>
+  </div>
+
+  <section>
+    <h2>Three verdicts. Three seconds.</h2>
+    <p class="lead">VETT never tells you to buy or sell. It tells you whether a stock is worth investigating — the decision is always yours.</p>
+    <div class="bands">
+      <div class="band"><div class="score" style="color:var(--teal)">75–100</div><b>🟢 Investigate</b><p style="color:var(--grey);margin:.4em 0 0">Worth a closer look right now.</p></div>
+      <div class="band"><div class="score" style="color:var(--amber)">50–74</div><b>🟡 Watch</b><p style="color:var(--grey);margin:.4em 0 0">Not a clear signal either way.</p></div>
+      <div class="band"><div class="score" style="color:var(--red)">0–49</div><b>🔴 Pass</b><p style="color:var(--grey);margin:.4em 0 0">The data doesn't support attention right now.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><b>Install the extension</b><p style="color:var(--grey);margin:.4em 0 0">One click from the Chrome Web Store. No account required. No data collected from you.</p></div>
+      <div class="step"><div class="n">2</div><b>Browse any financial page</b><p style="color:var(--grey);margin:.4em 0 0">VETT detects tickers on Yahoo Finance, Google Finance, Reddit, X/Twitter, and dozens of other sites automatically.</p></div>
+      <div class="step"><div class="n">3</div><b>Hover over any ticker</b><p style="color:var(--grey);margin:.4em 0 0">The card appears with the score (0–100), the current market regime, and the top signals driving it.</p></div>
+      <div class="step"><div class="n">4</div><b>Scores refresh daily</b><p style="color:var(--grey);margin:.4em 0 0">The engine re-runs every day and VETT pulls the latest brief — and every card shows the date its score is from.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The old way, vs. VETT</h2>
+    <div class="vs">
+      <div><b>Without VETT</b><ul><li>See a ticker mentioned in an article</li><li>Open a new tab</li><li>Search the ticker</li><li>Scroll past ads to find real data</li><li>Piece together whether it's worth a look</li><li>Forget why you were reading the article</li></ul></div>
+      <div><b>With VETT</b><ul><li>See a ticker mentioned in an article</li><li>Hover it</li><li>Decide in 3 seconds</li></ul></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="nfa"><b>Not financial advice.</b> VETT and the scores it displays are for educational and informational purposes only. Nothing here constitutes a recommendation to buy, sell, or hold any security. Past performance of the underlying engine does not guarantee future results. Always do your own research and consult a qualified financial advisor before making investment decisions.</div>
+    © 2026 VETT · <a href="methodology/">Methodology</a> · <a href="privacy/">Privacy</a>
+  </footer>
+</div>
+
+<script>
+  var CIRC = 2 * Math.PI * 52;
+  var DATA = {
+    NVDA: {score: 82, sym: "NVDA", name: "NVIDIA Corporation · NASDAQ", verdict: "🟢 Investigate", vcls: "v-green", color: "#00F5A0", regime: "Regime: Bull",
+      why: ["Relative strength in the top decile of the scored universe","Volume accumulation over the last 3 sessions","Trend intact — above its 50- and 200-day averages"], est: false},
+    AMD: {score: 47, sym: "AMD", name: "Advanced Micro Devices · NASDAQ", verdict: "🔴 Pass", vcls: "v-red", color: "#FF6B6B", regime: "Regime: Bull",
+      why: ["Three-week pullback — below its 50-day average","Relative strength slipping vs. the sector","Volume rising on down days (distribution)"], est: false},
+    RIVN: {score: 64, sym: "RIVN", name: "Rivian Automotive · NASDAQ", verdict: "Est. — estimated score", vcls: "v-amber", color: "#FFC24B", regime: "Live technicals",
+      why: ["Not in the daily scored universe — this card is built from live technical data","Clearly labelled Est. in the real extension, with a confidence level","Never passed off as an engine score"], est: true}
+  };
+  var arc = document.getElementById('arc'), num = document.getElementById('num');
+  arc.style.strokeDasharray = CIRC;
+  function show(t){
+    var d = DATA[t]; if(!d) return;
+    document.querySelectorAll('.tk').forEach(function(el){ el.classList.toggle('active', el.dataset.t === t); });
+    num.textContent = d.score;
+    arc.style.stroke = d.color;
+    arc.style.strokeDashoffset = CIRC * (1 - d.score/100);
+    document.getElementById('sym').textContent = d.sym;
+    document.getElementById('cname').textContent = d.name;
+    var v = document.getElementById('verdict'); v.textContent = d.verdict; v.className = 'verdict ' + d.vcls;
+    document.getElementById('regime').textContent = d.regime;
+    document.getElementById('why').innerHTML = d.why.map(function(w){ return '<li>' + w + '</li>'; }).join('');
+    document.getElementById('estbox').style.display = d.est ? 'flex' : 'none';
+    document.getElementById('asof').textContent = d.est ? 'Estimated card · built on the spot' : 'Daily score · Data as of Oct 24, 2026';
+  }
+  document.querySelectorAll('.tk').forEach(function(el){
+    el.addEventListener('mouseenter', function(){ show(el.dataset.t); });
+    el.addEventListener('click', function(){ show(el.dataset.t); });
+  });
+  show('NVDA');
+  var order = ['NVDA','AMD','RIVN'], i = 0, paused = false;
+  document.getElementById('demo').addEventListener('mouseenter', function(){ paused = true; });
+  document.getElementById('demo').addEventListener('mouseleave', function(){ paused = false; });
+  setInterval(function(){ if(!paused){ i = (i+1) % order.length; show(order[i]); } }, 4200);
+</script>
+</body>
+</html>
