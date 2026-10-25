@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — VETT</title>
+<meta name="description" content="How VETT scores a stock: the pillars, the market regime, untracked tickers, and what the score deliberately doesn't claim.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#FBF6E9;color:#141310;font-family:"Newsreader",Georgia,serif;line-height:1.6}
+  a{color:inherit}
+  .bar{display:flex;justify-content:space-between;align-items:center;padding:20px 36px;max-width:1180px;margin:0 auto}
+  .logo{font-family:"Archivo",sans-serif;font-weight:900;font-size:24px;letter-spacing:.07em}
+  .logo span{color:#0E7C4A}
+  .bar nav{font-family:"Archivo",sans-serif;font-size:13.5px;font-weight:700;display:flex;gap:24px}
+  .bar nav a{text-decoration:none;border-bottom:2px solid transparent}
+  .bar nav a:hover{border-bottom-color:#0E7C4A}
+  main{max-width:820px;margin:0 auto;padding:10px 26px 20px}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8A8271}
+  h1{font-size:clamp(36px,5.5vw,52px);font-weight:700;line-height:1.05;margin:10px 0 14px;letter-spacing:-.01em}
+  .lede{font-size:20px;font-style:italic;color:#3E3A31;line-height:1.55;margin:0 0 8px}
+  h2{font-family:"Archivo",sans-serif;font-size:21px;font-weight:800;margin:38px 0 10px;letter-spacing:-.005em}
+  p{font-size:17.5px;color:#262019;margin:0 0 14px}
+  .bands{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid #141310;background:#fff;box-shadow:6px 6px 0 rgba(20,19,16,.9);margin:18px 0 6px}
+  @media(max-width:700px){.bands{grid-template-columns:1fr}}
+  .band{padding:15px 18px;border-left:1px dashed #CFC7AE}
+  .band:first-child{border-left:0}
+  @media(max-width:700px){.band{border-left:0;border-top:1px dashed #CFC7AE}.band:first-child{border-top:0}}
+  .band .rng{font-family:"Archivo",sans-serif;font-weight:900;font-size:20px}
+  .band .nm{font-family:"Archivo",sans-serif;font-weight:800;text-transform:uppercase;font-size:12.5px;letter-spacing:.07em}
+  .band p{margin:4px 0 0;font-size:15px;line-height:1.4;color:#3E3A31}
+  .pillars{display:grid;grid-template-columns:1fr 1fr;gap:0 34px;margin:6px 0 4px}
+  @media(max-width:700px){.pillars{grid-template-columns:1fr}}
+  .pillar{border-top:1px solid #E3DCC8;padding:10px 0}
+  .pillar b{font-family:"Archivo",sans-serif;font-size:15.5px;display:block}
+  .pillar span{font-size:16px;color:#3E3A31}
+  .estcard{border:1.5px solid #141310;background:#fff;padding:15px 17px;box-shadow:5px 5px 0 rgba(20,19,16,.9);font-family:"Archivo",sans-serif;max-width:420px;margin:16px 0 6px}
+  .estcard .row{display:flex;justify-content:space-between;align-items:baseline}
+  .estcard .sym{font-weight:900;font-size:19px}
+  .estcard .num{font-weight:900;font-size:32px}
+  .estcard .num small{font-size:15px;font-weight:800;color:#9A6A00}
+  .estcard .note{font-family:"Newsreader",serif;font-size:14.5px;color:#3E3A31;margin-top:6px}
+  .nfa{border-top:1px solid #E3DCC8;margin-top:42px;padding-top:16px;font-size:15.5px;color:#3E3A31}
+  footer{max-width:820px;margin:30px auto 0;padding:22px 26px 40px;border-top:1px solid #E3DCC8;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:"IBM Plex Mono",monospace;font-size:12px;color:#8A8271}
+  footer a{text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">VETT<span>.</span></div>
+  <nav><a href="../">Home</a><a href="../privacy/">Privacy</a></nav>
+</div>
+
+<main>
+  <div class="kicker">Methodology</div>
+  <h1>How VETT scores a stock</h1>
+  <p class="lede">Every score you see in VETT is a number between 0 and 100, produced by InvestOS — the engine VETT runs on. This page explains what goes into that number, how often it changes, and what it deliberately doesn't claim.</p>
+
+  <h2>The score</h2>
+  <p>A score of 0–100 maps to one of three verdicts. VETT never tells you to buy or sell — it tells you whether a stock is worth a closer look.</p>
+  <div class="bands">
+    <div class="band"><div class="rng" style="color:#0E7C4A">75–100</div><div class="nm" style="color:#0E7C4A">Investigate</div><p>Worth a closer look right now.</p></div>
+    <div class="band"><div class="rng" style="color:#9A6A00">50–74</div><div class="nm" style="color:#9A6A00">Watch</div><p>Not a clear signal either way.</p></div>
+    <div class="band"><div class="rng" style="color:#B3372A">0–49</div><div class="nm" style="color:#B3372A">Pass</div><p>The data doesn't support attention right now.</p></div>
+  </div>
+
+  <h2>What goes into it</h2>
+  <p>InvestOS combines technical, fundamental, and market-context signals into a set of pillars, weighted dynamically by the current market regime rather than fixed once and left alone:</p>
+  <div class="pillars">
+    <div class="pillar"><b>Momentum</b><span>Trend strength, moving averages, relative strength rating</span></div>
+    <div class="pillar"><b>Growth</b><span>Revenue and earnings growth</span></div>
+    <div class="pillar"><b>Value</b><span>P/E, PEG, and fair-value checks</span></div>
+    <div class="pillar"><b>Dividend / Income</b><span>Yield, payout history, upcoming ex-dividend dates</span></div>
+    <div class="pillar"><b>Safety</b><span>Debt/equity, ROE, balance-sheet quality</span></div>
+    <div class="pillar"><b>Volume / Liquidity</b><span>Volume accumulation vs. distribution</span></div>
+  </div>
+  <p>On top of those pillars, InvestOS also factors in analyst consensus, insider buying/selling clusters, and macro/news signals (e.g. a sector headwind or tailwind from a detected event) — these show up as the specific bullet points behind the "Why?" panel on a card.</p>
+
+  <h2>Market regime</h2>
+  <p>Every score is shown alongside the current market regime (e.g. Bull, Neutral, Defensive, Cautious). The same score can mean something different depending on regime — VETT surfaces that tension directly on the card rather than leaving you to infer it, when the two are in conflict (a strong score in a defensive regime, or a weak score in a bull market).</p>
+
+  <h2>Untracked tickers</h2>
+  <p>Not every North American ticker is in InvestOS's daily-scored universe. If you hover one that isn't, VETT shows a card built from live technical data instead — price, trend, momentum, and 52-week range — with a clearly-labeled <b>estimated</b> score. This is explicitly not an InvestOS score, and the card says so.</p>
+  <div class="estcard">
+    <div class="row"><span class="sym">$RIVN</span><span class="num">64 <small>Est.</small></span></div>
+    <div class="note">Based on technical signals · Not financial advice</div>
+  </div>
+
+  <h2>Refresh cadence</h2>
+  <p>InvestOS re-runs daily. VETT caches the latest run and refreshes that cache roughly every hour, so a card is never more than about an hour behind the day's latest run — and every card shows the date the score is from, so you can always tell exactly how current it is.</p>
+
+  <h2>Coverage</h2>
+  <p>VETT covers North American markets only — US-listed and TSX. Tickers listed elsewhere are flagged as out of coverage rather than shown a guess.</p>
+
+  <p class="nfa"><b>Not financial advice.</b> VETT and the scores it displays are for educational and informational purposes only. Nothing on this page or in the extension constitutes a recommendation to buy, sell, or hold any security. Past performance of the underlying engine does not guarantee future results. Always do your own research and consult a qualified financial advisor before making investment decisions.</p>
+</main>
+
+<footer>
+  <span>© 2026 VETT</span>
+  <span><a href="../">Home</a> · <a href="../privacy/">Privacy</a></span>
+  <span>Educational scores, not financial advice.</span>
+</footer>
+
+</body>
+</html>
