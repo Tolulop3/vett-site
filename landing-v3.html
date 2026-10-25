@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VETT — See a ticker. Know its score.</title>
+<meta name="description" content="VETT is a free Chrome extension that pins a daily 0–100 score beside every stock ticker you read about. No account. Zero data collected.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#FBF6E9;color:#141310;font-family:"Newsreader",Georgia,serif}
+  a{color:inherit}
+  .bar{display:flex;justify-content:space-between;align-items:center;padding:20px 36px;max-width:1180px;margin:0 auto}
+  .logo{font-family:"Archivo",sans-serif;font-weight:900;font-size:24px;letter-spacing:.07em}
+  .logo span{color:#0E7C4A}
+  .bar nav{font-family:"Archivo",sans-serif;font-size:13.5px;font-weight:700;display:flex;gap:24px}
+  .bar nav a{text-decoration:none;border-bottom:2px solid transparent}
+  .bar nav a:hover{border-bottom-color:#0E7C4A}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 26px}
+  .sampletag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #141310;padding:2px 8px;border-radius:20px;opacity:.7}
+  /* hero */
+  .hero{padding:38px 0 6px}
+  h1{font-size:clamp(50px,8vw,88px);line-height:.98;font-weight:700;margin:16px 0 18px;letter-spacing:-.015em}
+  h1 .l2{display:block}
+  .standfirst{font-size:21.5px;font-style:italic;color:#3E3A31;max-width:34em;line-height:1.5;margin:0}
+  /* search (A's working part, C's clothes) */
+  .search{display:flex;margin-top:30px;border:2px solid #141310;background:#fff;max-width:520px;box-shadow:6px 6px 0 rgba(20,19,16,.9)}
+  .search input{flex:1;border:0;padding:15px 16px;font-size:16px;font-family:"IBM Plex Mono",monospace;text-transform:uppercase;outline:none;background:transparent;min-width:0}
+  .search button{background:#141310;color:#FBF6E9;border:0;font-weight:800;font-family:"Archivo",sans-serif;padding:0 22px;cursor:pointer;font-size:14px;letter-spacing:.03em}
+  .hint{font-family:"IBM Plex Mono",monospace;font-size:12px;color:#8A8271;margin-top:12px}
+  .result{margin-top:18px;max-width:520px}
+  .minicard{border:1.5px solid #141310;background:#fff;padding:16px 18px;box-shadow:5px 5px 0 rgba(20,19,16,.9);font-family:"Archivo",sans-serif;text-align:left}
+  .minicard .row{display:flex;justify-content:space-between;align-items:baseline}
+  .minicard .sym{font-weight:900;font-size:21px}
+  .minicard .num{font-weight:900;font-size:40px}
+  .minicard .vd{font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:13px}
+  .minicard .why{margin:10px 0 0;padding-left:17px;color:#3E3A31;font-family:"Newsreader",serif;font-size:15.5px;line-height:1.45}
+  .minicard .foot{margin-top:10px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:#8A8271}
+  /* band strip (B, shrunk) */
+  .bands{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1.5px solid #141310;background:#fff;margin:44px 0 0;box-shadow:6px 6px 0 rgba(20,19,16,.9)}
+  @media(max-width:760px){.bands{grid-template-columns:1fr}}
+  .band{padding:16px 20px;border-left:1px dashed #CFC7AE}
+  .band:first-child{border-left:0}
+  @media(max-width:760px){.band{border-left:0;border-top:1px dashed #CFC7AE}.band:first-child{border-top:0}}
+  .band .rng{font-family:"Archivo",sans-serif;font-weight:900;font-size:21px}
+  .band .nm{font-family:"Archivo",sans-serif;font-weight:800;text-transform:uppercase;font-size:12.5px;letter-spacing:.07em}
+  .band p{margin:4px 0 0;color:#3E3A31;font-size:15.5px;line-height:1.4}
+  /* demo (C) */
+  .demo{margin:52px 0 0}
+  .demo h2{font-size:30px;font-weight:700;margin:0 0 6px}
+  .demo .sub{font-style:italic;color:#3E3A31;font-size:18px;margin:0 0 18px}
+  .page{background:#fff;border:1px solid #E3DCC8;padding:26px 30px}
+  .page .src{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#8A8271;border-bottom:1px solid #EDE7D6;padding-bottom:9px;margin-bottom:12px}
+  .page p{font-size:19px;line-height:1.65;margin:0}
+  .tk{font-family:"IBM Plex Mono",monospace;font-size:.9em;font-weight:600;border-bottom:2.5px solid #0E7C4A;cursor:pointer;padding:0 1px}
+  .bloom{max-width:420px;margin:18px 0 4px auto}
+  .cardx{border:1.5px solid #141310;background:#fff;padding:15px 17px;box-shadow:5px 5px 0 rgba(20,19,16,.9);font-family:"Archivo",sans-serif}
+  .cardx .row{display:flex;justify-content:space-between;align-items:baseline}
+  .cardx .sym{font-weight:900;font-size:19px}
+  .cardx .num{font-weight:900;font-size:36px}
+  .cardx .vd{font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+  .cardx .why{margin:8px 0 0;padding-left:16px;font-family:"Newsreader",serif;font-size:14.5px;color:#3E3A31;line-height:1.45}
+  /* facts + cta */
+  .facts{display:flex;gap:26px;flex-wrap:wrap;margin:40px 0 0;font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase}
+  .facts b{color:#0E7C4A}
+  .cta-row{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:22px 0 0}
+  .cta{background:#141310;color:#FBF6E9;font-family:"Archivo",sans-serif;font-weight:800;letter-spacing:.04em;padding:15px 26px;text-decoration:none;font-size:14.5px;text-transform:uppercase}
+  .dry{font-style:italic;color:#6B6353;font-size:16.5px}
+  .honest{margin:34px 0 0;font-size:17px;line-height:1.55;color:#3E3A31;max-width:40em}
+  footer{max-width:1020px;margin:56px auto 0;padding:22px 26px 40px;border-top:1px solid #E3DCC8;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:"IBM Plex Mono",monospace;font-size:12px;color:#8A8271}
+  footer a{text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">VETT<span>.</span></div>
+  <nav><a href="methodology/">Methodology</a><a href="privacy/">Privacy</a></nav>
+</div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <span class="sampletag">Free Chrome extension · Demo scores are samples</span>
+    <h1>See a ticker.<span class="l2">Know its score.</span></h1>
+    <p class="standfirst">Stocks cross your screen all day — articles, threads, group chats. VETT pins a daily 0–100 score beside every ticker it finds, so the research comes to you. Try the search; it's the whole idea:</p>
+
+    <div class="search">
+      <input id="q" placeholder="TYPE A TICKER — NVDA" maxlength="6" aria-label="Ticker symbol">
+      <button onclick="lookup()">Score it</button>
+    </div>
+    <div class="hint">TRY: NVDA · PLTR · AMD · SHOP · TSLA · GME · MSFT · AAPL</div>
+    <div class="result" id="res"></div>
+
+    <div class="bands" aria-label="How to read a VETT score">
+      <div class="band"><div class="rng" style="color:#0E7C4A">75–100</div><div class="nm" style="color:#0E7C4A">Investigate</div><p>Worth a closer look today.</p></div>
+      <div class="band"><div class="rng" style="color:#9A6A00">50–74</div><div class="nm" style="color:#9A6A00">Watch</div><p>On the list. Not on the desk.</p></div>
+      <div class="band"><div class="rng" style="color:#B3372A">0–49</div><div class="nm" style="color:#B3372A">Pass</div><p>The data says keep walking.</p></div>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2>This is what it looks like out in the wild.</h2>
+    <p class="sub">No dashboard to remember to open — the score shows up where you already are. The card below is the actual card, at actual size.</p>
+    <div class="page">
+      <div class="src">From the morning read — hover a ticker</div>
+      <p>Chips led the session: <span class="tk" data-t="NVDA">$NVDA</span> held its run into earnings, <span class="tk" data-t="SHOP">$SHOP</span> kept climbing on the TSX, and <span class="tk" data-t="AMD">$AMD</span> slipped again on soft guidance chatter.</p>
+      <div class="bloom" id="bloom"></div>
+    </div>
+  </section>
+
+  <div class="facts"><span><b>Free</b> forever tier</span><span><b>No</b> account</span><span><b>Zero</b> data collected</span><span><b>Daily</b> scores, dated</span></div>
+
+  <div class="cta-row">
+    <a class="cta" href="#install" id="install">Add to Chrome — free</a>
+    <span class="dry">No feed of your browsing. No upsell wall. The card is the whole product.</span>
+  </div>
+
+  <p class="honest">Every score blends momentum, growth, value, safety and volume, weighted by the day's market regime — then it's logged and graded against what the market did next. The method is <a href="methodology/">published</a>. The misses are on record too.</p>
+
+</div>
+
+<footer>
+  <span>© 2026 VETT</span>
+  <span><a href="methodology/">Methodology</a> · <a href="privacy/">Privacy</a></span>
+  <span>Educational scores, not financial advice.</span>
+</footer>
+
+<script>
+  var SCORES = {
+    NVDA:{n:82,v:"Investigate",c:"#0E7C4A",why:["Top-decile relative strength in the scored universe","Volume accumulating for three sessions","Trend intact above 50- and 200-day averages"]},
+    PLTR:{n:88,v:"Investigate",c:"#0E7C4A",why:["Strongest momentum reading in this demo set","Breakout volume on up days","Extended — sized like it, not chased like it"]},
+    AMD:{n:47,v:"Pass",c:"#B3372A",why:["Below its 50-day average after a three-week slide","Relative strength slipping vs. its sector","Volume rising on down days"]},
+    SHOP:{n:71,v:"Watch",c:"#9A6A00",why:["Uptrend intact, momentum mid-pack","Growth pillar strong, value pillar weak","No fresh trigger today — tracking"]},
+    TSLA:{n:58,v:"Watch",c:"#9A6A00",why:["Range-bound; no trend edge either way","Volume neutral","Sentiment loud, signal quiet"]},
+    GME:{n:31,v:"Pass",c:"#B3372A",why:["Momentum negative across all lookbacks","Volume spikes are distribution, not accumulation","Score has lived under 40 for six weeks"]},
+    MSFT:{n:78,v:"Investigate",c:"#0E7C4A",why:["Steady uptrend, low volatility","Safety pillar near the top of the universe","Earnings drift positive"]},
+    AAPL:{n:76,v:"Investigate",c:"#0E7C4A",why:["Reclaimed its 50-day average this week","Dividend + buyback support the safety score","Momentum building, not extended"]}
+  };
+  function cardHTML(d, sym){
+    return '<div class="minicard"><div class="row"><span class="sym">'+sym+'</span><span class="num">'+d.n+'</span></div>'+
+      '<div class="vd" style="color:'+d.c+'">'+d.v+'</div><ul class="why">'+
+      d.why.map(function(w){return '<li>'+w+'</li>'}).join('')+'</ul>'+
+      '<div class="foot">SAMPLE CARD · DAILY SCORE</div></div>';
+  }
+  function lookup(){
+    var q = document.getElementById('q').value.trim().toUpperCase().replace('$','');
+    var box = document.getElementById('res');
+    if(SCORES[q]){ box.innerHTML = cardHTML(SCORES[q], q); }
+    else if(q){ box.innerHTML = '<div class="minicard"><div class="sym">'+q+'</div><p style="color:#3E3A31;font-family:\'Newsreader\',serif;font-size:15.5px;margin:8px 0 0;line-height:1.5">In the full product, every North American ticker gets a card like this — tracked names show the engine grade; untracked ones show a labelled <b>Est.</b> card. This demo knows NVDA, PLTR, AMD, SHOP, TSLA, GME, MSFT, AAPL.</p></div>'; }
+  }
+  document.getElementById('q').addEventListener('keydown', function(e){ if(e.key==='Enter') lookup(); });
+
+  var CDATA = {
+    NVDA:{n:82,v:"Investigate",c:"#0E7C4A",why:["Top-decile relative strength","Trend intact — above 50- & 200-day"]},
+    SHOP:{n:71,v:"Watch",c:"#9A6A00",why:["Uptrend intact, momentum mid-pack","No fresh trigger today"]},
+    AMD:{n:47,v:"Pass",c:"#B3372A",why:["Below its 50-day average","Volume rising on down days"]}
+  };
+  function bloom(sym){
+    var d = CDATA[sym]; if(!d) return;
+    document.getElementById('bloom').innerHTML =
+      '<div class="cardx"><div class="row"><span class="sym">'+sym+'</span><span class="num">'+d.n+'</span></div>'+
+      '<div class="vd" style="color:'+d.c+'">'+d.v+'</div><ul class="why">'+
+      d.why.map(function(w){return '<li>'+w+'</li>'}).join('')+'</ul></div>';
+  }
+  document.querySelectorAll('.tk').forEach(function(el){
+    el.addEventListener('mouseenter', function(){ bloom(el.dataset.t); });
+    el.addEventListener('click', function(){ bloom(el.dataset.t); });
+  });
+  bloom('NVDA');
+</script>
+</body>
+</html>
