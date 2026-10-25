@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VETT — Stock Score Hover</title>
+<meta name="description" content="Hover any stock ticker on any page and get a daily quantitative score (0–100). Free, no account, no data collected. Educational only — not financial advice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F1E8; --paper2:#EFE9DB; --ink:#141A21; --faded:#5C6570;
+    --rule:#141A21; --hair:#C9C2B2;
+    --green:#0E7C4A; --red:#B3372A; --amber:#9A6A00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"Newsreader",Georgia,serif;font-size:18px;line-height:1.55}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  /* ── ticker tape ─────────────────────────── */
+  .tape{background:var(--ink);color:var(--paper);overflow:hidden;white-space:nowrap;border-bottom:3px double var(--ink)}
+  .tape-inner{display:inline-block;padding:7px 0;font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.04em;animation:tape 46s linear infinite}
+  .tape b{font-weight:600}.up{color:#3ED598}.dn{color:#FF8A7A}
+  @keyframes tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  /* ── masthead ────────────────────────────── */
+  .masthead{padding:26px 0 0;text-align:center}
+  .mast-top{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faded);padding-bottom:10px}
+  .wordmark{font-family:"Archivo",sans-serif;font-weight:900;font-size:clamp(64px,11vw,124px);letter-spacing:.1em;line-height:.95;margin:2px 0 4px}
+  .wordmark .chk{color:var(--green)}
+  .tagline{font-style:italic;font-size:19px;color:var(--ink)}
+  .double-rule{border-top:3px solid var(--rule);border-bottom:1px solid var(--rule);height:5px;margin-top:16px}
+  .dateline{display:flex;flex-wrap:wrap;gap:8px 26px;justify-content:space-between;border-bottom:1px solid var(--rule);padding:8px 0;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+  .dateline nav{display:flex;gap:20px}
+  .dateline a{text-decoration:none}.dateline a:hover{text-decoration:underline}
+  /* ── hero ────────────────────────────────── */
+  .hero{display:grid;grid-template-columns:1fr 1.2fr;gap:54px;padding:46px 0 30px;align-items:start}
+  @media(max-width:920px){.hero{grid-template-columns:1fr}}
+  .section-label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:600}
+  h1{font-size:clamp(38px,4.6vw,58px);line-height:1.06;font-weight:600;margin:12px 0 18px;letter-spacing:-.01em}
+  h1 em{font-style:italic}
+  .standfirst{font-size:20.5px;font-style:italic;color:#2A323C;max-width:32em}
+  .meta{margin:26px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 0;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;display:flex;flex-wrap:wrap;gap:6px 22px}
+  .cta{display:inline-block;background:var(--ink);color:var(--paper);font-family:"Archivo",sans-serif;font-weight:800;letter-spacing:.05em;text-transform:uppercase;font-size:14px;padding:15px 26px;text-decoration:none;border:2px solid var(--ink)}
+  .cta:hover{background:var(--paper);color:var(--ink)}
+  .cta-sub{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faded);margin-top:10px}
+  /* ── exhibit / clipping ──────────────────── */
+  .exhibit-label{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--rule);padding-bottom:6px;margin-bottom:14px}
+  .exhibit-label .l{font-family:"Archivo",sans-serif;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:15px}
+  .exhibit-label .r{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faded);letter-spacing:.1em;text-transform:uppercase}
+  .clipping{background:#FBF9F3;border:1px solid var(--hair);padding:18px 20px 14px;box-shadow:4px 4px 0 rgba(20,26,33,.08)}
+  .clipping .src{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faded);border-bottom:1px solid var(--hair);padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between}
+  .clipping p{margin:0;font-size:17.5px}
+  .tk{font-family:"IBM Plex Mono",monospace;font-size:.92em;font-weight:600;cursor:pointer;border-bottom:2px solid var(--green);padding:0 1px}
+  .tk:hover,.tk.active{background:rgba(14,124,74,.13)}
+  .try{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faded);margin-top:10px;letter-spacing:.05em}
+  /* ── verdict slip ────────────────────────── */
+  .slip{position:relative;background:#FFFDF7;border:1.5px solid var(--ink);margin-top:22px;padding:26px 28px 18px;box-shadow:7px 7px 0 rgba(20,26,33,.9)}
+  .slip::before{content:"";position:absolute;left:0;right:0;top:9px;border-top:1px dashed var(--hair)}
+  .slip-head{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faded);padding-top:6px}
+  .slip-main{display:flex;gap:26px;align-items:flex-start;margin-top:14px;flex-wrap:wrap}
+  .score{font-family:"Archivo",sans-serif;font-weight:900;font-size:118px;line-height:.9;letter-spacing:-.02em}
+  .score small{font-size:26px;font-weight:800;color:var(--faded);letter-spacing:0}
+  .who{flex:1;min-width:220px}
+  .sym{font-family:"Archivo",sans-serif;font-weight:800;font-size:30px;letter-spacing:.02em}
+  .cname{color:var(--faded);font-size:16.5px;font-style:italic}
+  .stamp{display:inline-block;margin-top:12px;font-family:"Archivo",sans-serif;font-weight:900;letter-spacing:.12em;font-size:19px;text-transform:uppercase;border:3px solid var(--green);color:var(--green);padding:5px 14px 3px;transform:rotate(-4deg);border-radius:3px}
+  .stamp.red{border-color:var(--red);color:var(--red)}
+  .stamp.amber{border-color:var(--amber);color:var(--amber)}
+  .regime{font-family:"IBM Plex Mono",monospace;font-size:12.5px;margin-top:12px;letter-spacing:.06em;text-transform:uppercase}
+  .grounds{margin:20px 0 0;padding:14px 0 0;border-top:1px solid var(--hair);list-style:none;counter-reset:g}
+  .grounds li{counter-increment:g;padding:4px 0 4px 40px;position:relative;font-size:17px}
+  .grounds li::before{content:counter(g,decimal-leading-zero);position:absolute;left:0;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--green);top:9px}
+  .grounds-label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faded)}
+  .slip-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);margin-top:16px;padding-top:10px;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+  .specimen{color:var(--amber);font-weight:600}
+  .fnote{font-size:14.5px;font-style:italic;color:var(--faded);margin-top:14px}
+  /* ── sections ────────────────────────────── */
+  section{padding:40px 0 6px}
+  .sec-head{display:flex;align-items:baseline;gap:18px;border-bottom:2px solid var(--rule);padding-bottom:8px;margin-bottom:8px}
+  .sec-head .no{font-family:"IBM Plex Mono",monospace;color:var(--green);font-size:13px;font-weight:600}
+  h2{font-family:"Archivo",sans-serif;font-weight:800;font-size:27px;letter-spacing:.01em;margin:0;text-transform:uppercase}
+  table.verdicts{width:100%;border-collapse:collapse;font-size:17.5px}
+  table.verdicts th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;text-align:left;color:var(--faded);padding:12px 10px 8px 0;border-bottom:1px solid var(--rule)}
+  table.verdicts td{padding:13px 10px 13px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+  table.verdicts .rng{font-family:"Archivo",sans-serif;font-weight:800;font-size:21px;white-space:nowrap}
+  table.verdicts .vd{font-weight:600;white-space:nowrap}
+  .dotg{color:var(--green)}.dota{color:var(--amber)}.dotr{color:var(--red)}
+  .ledger{display:grid;grid-template-columns:1fr 1fr;gap:0 54px}
+  @media(max-width:800px){.ledger{grid-template-columns:1fr}}
+  .ledger .row{display:flex;align-items:baseline;gap:10px;padding:11px 0;border-bottom:1px solid var(--hair)}
+  .ledger .k{font-family:"Archivo",sans-serif;font-weight:800;font-size:16.5px;white-space:nowrap}
+  .ledger .dots{flex:1;border-bottom:2px dotted var(--hair);transform:translateY(-4px)}
+  .ledger .v{font-style:italic;color:#2A323C;text-align:right}
+  .steps .row{display:grid;grid-template-columns:70px 220px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--hair);align-items:baseline}
+  @media(max-width:700px){.steps .row{grid-template-columns:52px 1fr}.steps .row p{grid-column:2}}
+  .steps .n{font-family:"Archivo",sans-serif;font-weight:900;font-size:30px;color:var(--green)}
+  .steps .t{font-family:"Archivo",sans-serif;font-weight:800;font-size:17px}
+  .steps p{margin:0;color:#2A323C}
+  footer{margin-top:54px;border-top:3px solid var(--rule);padding:22px 0 46px}
+  .smallprint{font-size:13.5px;color:var(--faded);text-align:justify;column-count:2;column-gap:36px}
+  @media(max-width:700px){.smallprint{column-count:1}}
+  .colophon{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:20px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faded)}
+</style>
+</head>
+<body>
+
+<div class="tape" aria-hidden="true"><div class="tape-inner" id="tape"></div></div>
+
+<div class="wrap">
+  <div class="masthead">
+    <div class="mast-top"><span>Est. 2026</span><span>A Chrome Extension for People Who Read About Stocks</span><span>Toronto · Lagos</span></div>
+    <div class="wordmark">VETT<span class="chk">.</span></div>
+    <div class="tagline">The stock score hover — a grade for every ticker, printed where you already read.</div>
+    <div class="double-rule"></div>
+    <div class="dateline">
+      <span>Vol. 01 — No. 001</span>
+      <span>Price: Free</span>
+      <nav><a href="methodology/">Methodology</a><a href="privacy/">Privacy</a></nav>
+      <span>Chrome Web Store — forthcoming</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div>
+      <div class="section-label">The Instrument</div>
+      <h1>Every ticker you read about, <em>graded</em> before you finish the paragraph.</h1>
+      <p class="standfirst">VETT watches the page you're reading, spots the stock symbols, and pins a daily score — 0 to 100 — beside each one. Worth a closer look, or not worth your afternoon. The engine behind it logs every pick it makes and grades itself against what the market actually did.</p>
+      <div class="meta"><span>Free</span><span>No account</span><span>No data collected</span><span>Scores refresh daily</span><span>Not financial advice</span></div>
+      <a class="cta" href="#exhibit">See the specimen</a>
+      <div class="cta-sub">Launching on the Chrome Web Store shortly. North American markets at first.</div>
+    </div>
+
+    <div id="exhibit">
+      <div class="exhibit-label"><span class="l">Exhibit A</span><span class="r">The card, at working size</span></div>
+      <div class="clipping">
+        <div class="src"><span>Market Wrap — a page like any other</span><span>Reproduction</span></div>
+        <p>Analysts remain bullish on <span class="tk active" data-t="NVDA">$NVDA</span> heading into earnings, citing data-center demand and AI infrastructure tailwinds. Meanwhile <span class="tk" data-t="AMD">$AMD</span> trades near support after a three-week pullback, and <span class="tk" data-t="RIVN">$RIVN</span> sits outside the daily scored universe entirely.</p>
+        <div class="try">— Hover or tap a ticker. The verdict slip below is the product.</div>
+      </div>
+
+      <div class="slip">
+        <div class="slip-head"><span>Verdict Slip</span><span id="asof">Daily score · Oct 24, 2026</span></div>
+        <div class="slip-main">
+          <div class="score"><span id="num">82</span><small>/100</small></div>
+          <div class="who">
+            <div class="sym" id="sym">NVDA</div>
+            <div class="cname" id="cname">NVIDIA Corporation — NASDAQ</div>
+            <div><span class="stamp" id="stamp">Investigate</span></div>
+            <div class="regime" id="regime">Market regime: Bull</div>
+          </div>
+        </div>
+        <div class="grounds-label" style="margin-top:18px">Grounds</div>
+        <ul class="grounds" id="why">
+          <li>Relative strength in the top decile of the scored universe</li>
+          <li>Volume accumulating over the last three sessions</li>
+          <li>Trend intact — above its 50- and 200-day averages</li>
+        </ul>
+        <div class="slip-foot">
+          <span class="specimen">Specimen — a sample card</span>
+          <span><a href="methodology/">How the score is made ↗</a></span>
+        </div>
+      </div>
+      <p class="fnote">† A ticker outside the daily universe — try $RIVN — gets an estimated card built from live technicals, stamped <b>Est.</b> and never dressed up as the real thing.</p>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="no">§ 01</span><h2>The Three Verdicts</h2></div>
+    <table class="verdicts">
+      <tr><th>Score</th><th>Verdict</th><th>What it means</th></tr>
+      <tr><td class="rng">75–100</td><td class="vd"><span class="dotg">■</span> Investigate</td><td>Worth a closer look right now. The data supports your attention.</td></tr>
+      <tr><td class="rng">50–74</td><td class="vd"><span class="dota">■</span> Watch</td><td>No clear signal either way. On the list, not on the desk.</td></tr>
+      <tr><td class="rng">0–49</td><td class="vd"><span class="dotr">■</span> Pass</td><td>The data doesn't support attention right now. Keep walking.</td></tr>
+    </table>
+    <p class="fnote">VETT never says buy or sell. It says whether a stock has earned your next hour of research — the decision stays where it belongs.</p>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="no">§ 02</span><h2>What Goes Into the Number</h2></div>
+    <div class="ledger">
+      <div class="row"><span class="k">Momentum</span><span class="dots"></span><span class="v">trend strength, moving averages, relative strength</span></div>
+      <div class="row"><span class="k">Growth</span><span class="dots"></span><span class="v">revenue &amp; earnings growth</span></div>
+      <div class="row"><span class="k">Value</span><span class="dots"></span><span class="v">P/E, PEG, fair-value checks</span></div>
+      <div class="row"><span class="k">Dividend / Income</span><span class="dots"></span><span class="v">yield, payout history, ex-dates</span></div>
+      <div class="row"><span class="k">Safety</span><span class="dots"></span><span class="v">debt, ROE, balance-sheet quality</span></div>
+      <div class="row"><span class="k">Volume / Liquidity</span><span class="dots"></span><span class="v">accumulation vs. distribution</span></div>
+    </div>
+    <p class="fnote">Six pillars, weighted by the market regime of the day rather than fixed once and forgotten — plus analyst consensus, insider clusters, and news signals, which appear as the grounds on each slip. The full method is published on the <a href="methodology/">methodology page</a>; the engine's pick-by-pick record is logged, not curated.</p>
+  </section>
+
+  <section class="steps">
+    <div class="sec-head"><span class="no">§ 03</span><h2>How It Works</h2></div>
+    <div class="row"><span class="n">01</span><span class="t">Install</span><p>One click from the Chrome Web Store when it opens. No account, no sign-up, nothing collected.</p></div>
+    <div class="row"><span class="n">02</span><span class="t">Read as usual</span><p>Yahoo Finance, Google Finance, Reddit, X, the news — VETT finds the tickers on the page by itself.</p></div>
+    <div class="row"><span class="n">03</span><span class="t">Hover</span><p>The verdict slip appears: the score, the regime, and the grounds behind it. Three seconds, no new tab.</p></div>
+    <div class="row"><span class="n">04</span><span class="t">Tomorrow, again</span><p>The engine re-runs daily and every slip carries the date its score is from. Stale numbers say so.</p></div>
+  </section>
+
+  <footer>
+    <div class="smallprint"><b>Not financial advice.</b> VETT and the scores it displays are for educational and informational purposes only. Nothing on this page or in the extension constitutes a recommendation to buy, sell, or hold any security. Scores are produced by a rules-based engine (InvestOS) and will sometimes be wrong; the engine's logged record exists precisely so that can be checked rather than asserted. Past performance does not guarantee future results. Always do your own research and consult a qualified financial advisor before making investment decisions.</div>
+    <div class="colophon">
+      <span>© 2026 VETT</span>
+      <span><a href="methodology/">Methodology</a> · <a href="privacy/">Privacy</a></span>
+      <span>Set in Newsreader, Archivo &amp; Plex Mono</span>
+    </div>
+  </footer>
+</div>
+
+<script>
+  var TAPE = [["NVDA","+2.41%","up"],["AMD","−1.83%","dn"],["DANGCEM","+10.00%","up"],["MTNN","0.00%",""],["AAPL","+0.64%","up"],["GTCO","0.00%",""],["ASI","+0.92%","up"],["TSLA","−0.47%","dn"],["ZENITHBANK","+1.12%","up"],["SHOP","+3.05%","up"],["OANDO","−1.05%","dn"],["MSFT","+0.89%","up"]];
+  var tapeHTML = TAPE.map(function(t){ return "<b>"+t[0]+"</b> <span class='"+t[2]+"'>"+t[1]+"</span>"; }).join(" &nbsp;·&nbsp; ") + " &nbsp;·&nbsp; ";
+  document.getElementById('tape').innerHTML = tapeHTML + tapeHTML;
+
+  var DATA = {
+    NVDA: {score:82, sym:"NVDA", name:"NVIDIA Corporation — NASDAQ", stamp:"Investigate", cls:"", regime:"Market regime: Bull", asof:"Daily score · Oct 24, 2026",
+      why:["Relative strength in the top decile of the scored universe","Volume accumulating over the last three sessions","Trend intact — above its 50- and 200-day averages"]},
+    AMD: {score:47, sym:"AMD", name:"Advanced Micro Devices — NASDAQ", stamp:"Pass", cls:"red", regime:"Market regime: Bull", asof:"Daily score · Oct 24, 2026",
+      why:["Three-week pullback — trading below its 50-day average","Relative strength slipping against its sector","Volume rising on down days: distribution, not accumulation"]},
+    RIVN: {score:64, sym:"RIVN", name:"Rivian Automotive — NASDAQ", stamp:"Est.", cls:"amber", regime:"Built from live technicals", asof:"Estimated card · made on the spot",
+      why:["Outside the daily scored universe — no engine score exists","This estimate is labelled Est. in the product, with a confidence level","It is never presented as the engine's verdict"]}
+  };
+  function show(t){
+    var d = DATA[t]; if(!d) return;
+    document.querySelectorAll('.tk').forEach(function(el){ el.classList.toggle('active', el.dataset.t === t); });
+    document.getElementById('num').textContent = d.score;
+    document.getElementById('sym').textContent = d.sym;
+    document.getElementById('cname').textContent = d.name;
+    var s = document.getElementById('stamp'); s.textContent = d.stamp; s.className = 'stamp ' + d.cls;
+    document.getElementById('regime').textContent = d.regime;
+    document.getElementById('asof').textContent = d.asof;
+    document.getElementById('why').innerHTML = d.why.map(function(w){ return '<li>' + w + '</li>'; }).join('');
+  }
+  document.querySelectorAll('.tk').forEach(function(el){
+    el.addEventListener('mouseenter', function(){ show(el.dataset.t); });
+    el.addEventListener('click', function(){ show(el.dataset.t); });
+  });
+  show('NVDA');
+  var order = ['NVDA','AMD','RIVN'], i = 0, paused = false;
+  var ex = document.getElementById('exhibit');
+  ex.addEventListener('mouseenter', function(){ paused = true; });
+  ex.addEventListener('mouseleave', function(){ paused = false; });
+  setInterval(function(){ if(!paused){ i = (i+1) % order.length; show(order[i]); } }, 4600);
+</script>
+</body>
+</html>
